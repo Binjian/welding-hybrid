@@ -1,0 +1,17 @@
+==========================================================
+  welding-hybrid performance benchmark
+==========================================================
+
+[Module 4  Goldak FDM]
+  Python  : 0.46 s
+  Julia   : (unavailable)
+
+[Module 6  Droplet resonance sweep, 41 points]
+  Python  : 0.79 s
+  Julia   : (unavailable)
+
+[Module 7  Robot DEL 200 s, h=20 ms]
+  Python  : 5.92 s
+  Julia   : (unavailable)
+
+==========================================================
