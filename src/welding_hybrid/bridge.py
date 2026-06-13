@@ -13,6 +13,7 @@ Julia   安装:   https://julialang.org/downloads/  (>=1.9)
 
 from __future__ import annotations
 import os
+import shutil
 import time
 import warnings
 from pathlib import Path
@@ -20,10 +21,36 @@ from typing import Any
 
 import numpy as np
 
-# Julia 源文件目录 (与本文件同级的 ../julia/)
 _PKG_ROOT  = Path(__file__).resolve().parent.parent.parent
-_JULIA_SRC = _PKG_ROOT / "src" / "julia"
+_JULIA_ENTRY = _PKG_ROOT / "src" / "WeldingHot.jl"
 _JULIA_PRJ = _PKG_ROOT               # Project.toml 在仓库根目录
+
+
+def _prepare_julia_environment() -> None:
+    """Expose Julia-bundled tools needed by package precompilation."""
+    julia_exe = os.environ.get("PYTHON_JULIAPKG_EXE") or shutil.which("julia")
+    if julia_exe:
+        resolved = Path(julia_exe).expanduser().resolve()
+        candidates = [
+            resolved.parent,
+            resolved.parent.parent / "libexec" / "julia",
+        ]
+        for candidate in candidates:
+            if (candidate / "lld").is_file():
+                path_entries = os.environ.get("PATH", "").split(os.pathsep)
+                candidate_s = str(candidate)
+                if candidate_s not in path_entries:
+                    os.environ["PATH"] = os.pathsep.join([candidate_s, *path_entries])
+                break
+
+    for var in ("LD_LIBRARY_PATH", "DYLD_FALLBACK_LIBRARY_PATH"):
+        value = os.environ.get(var)
+        if value and "~" in value:
+            os.environ[var] = os.pathsep.join(
+                str(Path(part).expanduser()) if part.startswith("~") else part
+                for part in value.split(os.pathsep)
+            )
+
 
 # ─────────────────────────────────────────────────────────────────────
 class _JuliaBackend:
@@ -71,9 +98,10 @@ class _JuliaBackend:
                   flush=True)
             # 告知 juliacall 使用项目 Project.toml
             os.environ.setdefault("JULIA_PROJECT", str(_JULIA_PRJ))
+            _prepare_julia_environment()
             from juliacall import Main as jl
             jl.seval(f'import Pkg; Pkg.activate("{_JULIA_PRJ}"); Pkg.instantiate()')
-            jl.seval(f'include("{_JULIA_SRC / "WeldingHot.jl"}")')
+            jl.seval(f'include("{_JULIA_ENTRY}")')
             self._jl  = jl
             self._mod = jl.WeldingHot
             self._ready = True

@@ -3,11 +3,13 @@ uuid = "c7f3a120-4e1b-4c3e-8e2a-1a9b3c8d5f6e"
 version = "1.0.0"
 
 [deps]
-ForwardDiff  = "f6369f11-7733-5829-9624-2563aa707210"
-StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+StructUtils = "ec057cc2-7a8d-4b58-b3b3-92acb9f63b42"
 
 [compat]
-ForwardDiff  = "0.10"
+ForwardDiff = "0.10"
 StaticArrays = "1"
-julia        = "1.9"
+StructUtils = "2.8.2"
+julia = "1.9"
